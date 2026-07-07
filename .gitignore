@@ -1,0 +1,9 @@
+evidence/
+app/node_modules/
+app/dist/
+app/dist-server/
+app/.env
+app/.env.local
+app/activation-result.json
+app/*.log
+*.log

@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: signaldesk-txline
+    env: docker
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: TXLINE_API_ORIGIN
+        value: https://txline.txodds.com
