@@ -27,6 +27,7 @@ TxLINE feed or replay scenario
 - Shared TypeScript strategy engine used by both dashboard and API.
 - Replay mode for guaranteed judge demo availability.
 - Live TxLINE mode with server-side credentials.
+- Public Render deployment: `https://signaldesk-txline.onrender.com`.
 
 ## Local API
 
@@ -43,6 +44,12 @@ TxLINE feed or replay scenario
 - `GET /api/txline/scores/stream`
 - `GET /api/txline/odds/validation`
 - `GET /api/txline/scores/stat-validation`
+
+Public verification endpoints:
+
+- `GET https://signaldesk-txline.onrender.com/api/health`
+- `GET https://signaldesk-txline.onrender.com/api/txline/status`
+- `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
 
 ## Agents
 
@@ -81,7 +88,7 @@ Mainnet activation proof:
 - TxLINE service level: 12
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 - Activated at: `2026-07-07T11:05:48.470Z`
-- Live fixture snapshot verified: `GET /api/txline/fixtures` returned HTTP 200 with TxLINE fixture JSON.
+- Live fixture snapshot verified locally and publicly: `GET /api/txline/fixtures` returned HTTP 200 with TxLINE fixture JSON.
 
 Required headers:
 

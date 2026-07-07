@@ -4,6 +4,13 @@ SignalDesk is an autonomous trading operations workbench for the TxODDS TxLINE W
 
 The project is built for the **Trading Tools and Agents** track. It is not a real-money betting product; execution is paper-only by default.
 
+## Live MVP
+
+- App: https://signaldesk-txline.onrender.com
+- Health: https://signaldesk-txline.onrender.com/api/health
+- TxLINE status: https://signaldesk-txline.onrender.com/api/txline/status
+- Public repository: https://github.com/greendhy/signaldesk-txline
+
 ## Why This Can Win
 
 Most entries stop at alerts, chatbots, or simple dashboards. SignalDesk is shaped like a tool a trading desk, market operator, or B2B sports-data customer could actually evaluate:
@@ -17,11 +24,12 @@ Most entries stop at alerts, chatbots, or simple dashboards. SignalDesk is shape
 
 ## Live TxLINE Proof
 
-Mainnet free-tier activation has been completed for local development.
+Mainnet free-tier activation has been completed and deployed server-side on Render.
 
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
-- Verified endpoint: `GET /api/txline/fixtures`
-- Verification result: HTTP 200 with TxLINE fixture JSON
+- Local verified endpoint: `GET /api/txline/fixtures`
+- Public verified endpoint: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- Verification result: HTTP 200 with TxLINE fixture JSON and `liveReady: true`
 
 ## Run Locally
 
@@ -52,7 +60,7 @@ http://127.0.0.1:8790/api/health
 
 ## Deployment
 
-The app includes a Dockerfile and Render blueprint at `render.yaml`. TxLINE credentials should be configured as server-side environment variables:
+The app is deployed on Render from the Dockerfile and blueprint at `render.yaml`. TxLINE credentials are configured as server-side environment variables:
 
 ```text
 TXLINE_API_ORIGIN=https://txline.txodds.com

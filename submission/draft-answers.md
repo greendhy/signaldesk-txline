@@ -10,7 +10,15 @@ SignalDesk is an autonomous trading operations workbench for TxLINE. It ingests 
 
 ## Live MVP
 
-Pending deployment. Local live mode has been activated against TxLINE mainnet and verified through `GET /api/txline/fixtures`.
+https://signaldesk-txline.onrender.com
+
+Public verification endpoints:
+
+- `GET https://signaldesk-txline.onrender.com/api/health`
+- `GET https://signaldesk-txline.onrender.com/api/txline/status`
+- `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+
+Render deployment is live with server-side TxLINE credentials. `GET /api/txline/fixtures` returns HTTP 200 with live TxLINE fixture JSON.
 
 ## Demo Video
 
@@ -18,7 +26,7 @@ Pending recording.
 
 ## Public Repository
 
-Pending GitHub setup.
+https://github.com/greendhy/signaldesk-txline
 
 ## Technical Documentation
 
@@ -28,7 +36,9 @@ Use `docs/technical-overview.md`.
 
 - Mainnet subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 - Activation time: `2026-07-07T11:05:48.470Z`
-- Verified endpoint: `GET /api/txline/fixtures` returned HTTP 200 with live fixture JSON.
+- Local verification: `GET /api/txline/fixtures` returned HTTP 200 with live fixture JSON.
+- Public verification: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures` returned HTTP 200 with live fixture JSON.
+- Public health: `GET https://signaldesk-txline.onrender.com/api/health` reports `liveReady: true`.
 
 ## TxLINE API Feedback
 

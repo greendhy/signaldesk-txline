@@ -488,7 +488,8 @@ h1 {
 }
 
 .receipt-list,
-.live-box {
+.live-box,
+.proof-card {
   display: grid;
   gap: 8px;
 }
@@ -522,6 +523,14 @@ h1 {
 
 .live-box {
   margin: 14px 0;
+}
+
+.proof-card {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #ded5c6;
+  border-radius: 8px;
+  background: #fffdf8;
 }
 
 pre {

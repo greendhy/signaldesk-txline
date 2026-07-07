@@ -49,11 +49,11 @@ The same feed produces different execution status when risk controls change. Thi
 
 ## 4:00 - 4:40
 
-Switch to live mode and show token status.
+Switch to live mode and show the TxLINE proof panel.
 
 Say:
 
-The server is prepared for TxLINE credentials. Once the free-tier wallet activation is complete, live endpoints are consumed server-side so API tokens are not exposed to browsers.
+The free-tier wallet activation is complete. Live endpoints are consumed server-side, API tokens are not exposed to browsers, and the app verifies the fixture snapshot through the public Render deployment.
 
 ## 4:40 - 5:00
 

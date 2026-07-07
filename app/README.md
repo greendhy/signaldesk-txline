@@ -26,10 +26,10 @@ Implemented:
 - Node API for replay, engine runs, health, and TxLINE credential status
 - wallet-based TxLINE free-tier API activation
 - live TxLINE endpoint verification with `TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN`
+- public Render deployment at `https://signaldesk-txline.onrender.com`
 
 Pending:
 
-- deployment to a public Node host
 - final demo video
 
 ## Local Development
@@ -78,11 +78,12 @@ Without credentials, SignalDesk still runs in replay mode and clearly marks live
 
 ## Live TxLINE Verification
 
-Mainnet free-tier activation has been completed for local development.
+Mainnet free-tier activation has been completed and deployed server-side on Render.
 
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
-- Verified proxy endpoint: `GET /api/txline/fixtures`
-- Verification result: HTTP 200 with TxLINE fixture JSON
+- Local verified proxy endpoint: `GET /api/txline/fixtures`
+- Public verified proxy endpoint: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- Verification result: HTTP 200 with TxLINE fixture JSON and `liveReady: true`
 
 ## TxLINE Endpoints Targeted
 
@@ -125,4 +126,4 @@ pnpm start
 
 ## Render
 
-The repository root includes `render.yaml` for a free Docker web service with `app/` as the service root. Configure `TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN` as secret server-side environment variables in Render.
+The repository root includes `render.yaml` for a free Docker web service with `app/` as the service root. `TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN` are configured as secret server-side environment variables in Render.

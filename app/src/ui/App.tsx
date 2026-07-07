@@ -33,6 +33,13 @@ import { ActivateTxline } from "./ActivateTxline";
 
 const speedOptions = [0.5, 1, 2, 4];
 
+type LiveProof = {
+  status: "checking" | "ready" | "missing";
+  apiOrigin?: string;
+  fixtureCount?: number;
+  checkedAt?: string;
+};
+
 export function App() {
   if (window.location.pathname === "/activate") {
     return <ActivateTxline />;
@@ -46,6 +53,7 @@ export function App() {
   const [index, setIndex] = useState(0);
   const [selectedDecisionId, setSelectedDecisionId] = useState<string | null>(null);
   const [liveStatus, setLiveStatus] = useState<"checking" | "ready" | "missing">("checking");
+  const [liveProof, setLiveProof] = useState<LiveProof>({ status: "checking" });
 
   const scenario = useMemo(
     () => replayScenarios.find((item) => item.id === scenarioId) || replayScenarios[0],
@@ -64,11 +72,31 @@ export function App() {
     let mounted = true;
     fetch("/api/txline/status")
       .then((response) => response.json())
-      .then((data) => {
-        if (mounted) setLiveStatus(data.liveReady ? "ready" : "missing");
+      .then(async (data) => {
+        if (!mounted) return;
+        const status = data.liveReady ? "ready" : "missing";
+        setLiveStatus(status);
+        setLiveProof({
+          status,
+          apiOrigin: data.apiOrigin,
+          checkedAt: new Date().toISOString(),
+        });
+
+        if (!data.liveReady) return;
+        const fixturesResponse = await fetch("/api/txline/fixtures");
+        const fixtures = await fixturesResponse.json();
+        if (!mounted) return;
+        setLiveProof({
+          status: fixturesResponse.ok ? "ready" : "missing",
+          apiOrigin: data.apiOrigin,
+          fixtureCount: Array.isArray(fixtures) ? fixtures.length : undefined,
+          checkedAt: new Date().toISOString(),
+        });
       })
       .catch(() => {
-        if (mounted) setLiveStatus("missing");
+        if (!mounted) return;
+        setLiveStatus("missing");
+        setLiveProof({ status: "missing", checkedAt: new Date().toISOString() });
       });
     return () => {
       mounted = false;
@@ -134,7 +162,13 @@ export function App() {
 
         <aside className="right-stack">
           <RiskPanel risk={risk} setRisk={setRisk} />
-          <ReceiptPanel decision={selectedDecision} latestEvent={latestEvent} mode={mode} liveStatus={liveStatus} />
+          <ReceiptPanel
+            decision={selectedDecision}
+            latestEvent={latestEvent}
+            mode={mode}
+            liveStatus={liveStatus}
+            liveProof={liveProof}
+          />
         </aside>
       </section>
     </main>
@@ -443,11 +477,13 @@ function ReceiptPanel({
   latestEvent,
   mode,
   liveStatus,
+  liveProof,
 }: {
   decision?: AgentDecision;
   latestEvent: FeedEvent;
   mode: FeedMode;
   liveStatus: "checking" | "ready" | "missing";
+  liveProof: LiveProof;
 }) {
   return (
     <section className="panel receipt-panel">
@@ -477,9 +513,17 @@ function ReceiptPanel({
         <pre>{JSON.stringify(compactEvent(latestEvent), null, 2)}</pre>
       </div>
 
+      <div className="proof-card">
+        <span className="eyebrow">Live TxLINE proof</span>
+        <KeyValue label="Status" value={proofStatusLabel(liveProof.status)} />
+        <KeyValue label="Proxy" value="/api/txline/fixtures" />
+        {liveProof.fixtureCount !== undefined && <KeyValue label="Fixtures" value={`${liveProof.fixtureCount} live rows`} />}
+        {liveProof.apiOrigin && <KeyValue label="Origin" value={liveProof.apiOrigin} />}
+      </div>
+
       <StatusPill
         tone={mode === "live" && liveStatus === "missing" ? "warn" : "neutral"}
-        label={mode === "live" && liveStatus === "missing" ? "Live token not configured" : "Replay evidence active"}
+        label={mode === "live" && liveStatus === "missing" ? "Live token not configured" : "Replay and live proof active"}
       />
     </section>
   );
@@ -502,6 +546,12 @@ function labelSide(side: string, status: string) {
   if (status === "blocked") return "blocked";
   if (side === "quote-two-sided") return "quote";
   return side.replaceAll("-", " ");
+}
+
+function proofStatusLabel(status: LiveProof["status"]) {
+  if (status === "ready") return "server token verified";
+  if (status === "checking") return "checking";
+  return "not configured";
 }
 
 function compactEvent(event: FeedEvent) {
