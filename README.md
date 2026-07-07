@@ -52,7 +52,7 @@ http://127.0.0.1:8790/api/health
 
 ## Deployment
 
-The app includes a Dockerfile and Render blueprint at `app/render.yaml`. TxLINE credentials should be configured as server-side environment variables:
+The app includes a Dockerfile and Render blueprint at `render.yaml`. TxLINE credentials should be configured as server-side environment variables:
 
 ```text
 TXLINE_API_ORIGIN=https://txline.txodds.com

@@ -122,3 +122,7 @@ pnpm build
 pnpm dev
 pnpm start
 ```
+
+## Render
+
+The repository root includes `render.yaml` for a free Docker web service with `app/` as the service root. Configure `TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN` as secret server-side environment variables in Render.
