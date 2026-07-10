@@ -9,6 +9,16 @@ SignalDesk is a counterfactual risk control plane for autonomous TxLINE trading 
 3. Strategy and risk decisions are deterministic.
 4. A decision can be traced from a TxLINE message and Merkle proof to a SHA-256 receipt.
 
+## Business and Production Fit
+
+SignalDesk is designed as the control layer between a fast sports-data feed and an execution venue. A trading desk or market operator can evaluate a strategy under multiple risk policies before enabling capital, halt every agent without stopping data ingestion, and retain a deterministic explanation for each proposed action.
+
+- **Safer strategy rollout:** compare normal, reduced, and halted execution against the exact same TxLINE event sequence.
+- **Operator governance:** confidence, exposure, reduced-sizing, and kill-switch controls are independent from strategy code.
+- **Audit and incident review:** message IDs, proof paths, policy outcomes, and receipt hashes make decisions reproducible after the match.
+- **Review continuity:** verified replay preserves a real incident when no fixture is live, while the separate live pulse proves current TxLINE access.
+- **Deployment posture:** one Dockerized Node service keeps credentials server-side, exposes health and evidence APIs, and serves the dashboard without judge setup.
+
 ## Architecture
 
 ```text

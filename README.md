@@ -1,5 +1,7 @@
 # SignalDesk: TxLINE Counterfactual Risk Control Plane
 
+[![CI](https://github.com/greendhy/signaldesk-txline/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/greendhy/signaldesk-txline/actions/workflows/ci.yml)
+
 SignalDesk is an autonomous trading operations workbench for the TxODDS TxLINE World Cup hackathon. It turns real TxLINE odds and score events into deterministic agent decisions, compares those decisions under three execution policies, and emits SHA-256 receipts tied to TxLINE validation proofs.
 
 The project targets the **Trading Tools and Agents** track. Execution is paper-only; SignalDesk does not place bets, custody funds, or route orders.
@@ -54,6 +56,8 @@ pnpm dev
 ```
 
 Open `http://127.0.0.1:5173`. The API runs on `http://127.0.0.1:8790`.
+
+Every push to `main` also runs the deterministic engine tests, production build, and production dependency audit in GitHub Actions.
 
 ## TxLINE Endpoints Used
 
