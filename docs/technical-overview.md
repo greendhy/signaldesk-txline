@@ -107,7 +107,7 @@ For the verified replay, receipt proof status is `txline-validated`.
 
 ## TxLINE Integration
 
-Credentials are server-side only. Requests use:
+Runtime credentials are server-side only. Requests use:
 
 ```text
 Authorization: Bearer ${TXLINE_GUEST_JWT}
@@ -117,6 +117,15 @@ X-Api-Token: ${TXLINE_API_TOKEN}
 Mainnet service level 12 activation transaction:
 
 `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
+
+The submitted evidence chain uses exactly these upstream endpoints:
+
+- `GET /api/fixtures/snapshot`
+- `GET /api/odds/updates/18209181`
+- `GET /api/scores/updates/18209181`
+- `GET /api/odds/validation`
+
+Snapshot, stream, and score-stat validation proxies are implemented for extension, but are not presented as source evidence for the submitted incident. Wallet activation helpers are available during local development and return HTTP 403 in the public production service.
 
 ## Verification
 

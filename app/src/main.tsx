@@ -1,14 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Buffer } from "buffer";
 import "./ui/styles.css";
 
-globalThis.Buffer = Buffer;
+async function loadRootComponent() {
+  if (import.meta.env.DEV && window.location.pathname === "/activate") {
+    return (await import("./ui/ActivateTxline")).ActivateTxline;
+  }
+  return (await import("./ui/App")).App;
+}
 
-void import("./ui/App").then(({ App }) => {
+void loadRootComponent().then((RootComponent) => {
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-      <App />
+      <RootComponent />
     </React.StrictMode>,
   );
 });

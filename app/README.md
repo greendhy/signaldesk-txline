@@ -1,8 +1,8 @@
 # SignalDesk
 
-SignalDesk is a verifiable trading command center for the TxODDS TxLINE World Cup hackathon. It ingests TxLINE-shaped odds and score feeds, runs deterministic strategy agents, applies risk controls, paper-executes decisions, and generates audit-ready receipts for every automated action.
+SignalDesk is a counterfactual risk control plane for the TxODDS TxLINE World Cup hackathon. It ingests real TxLINE odds and score history plus a continuously refreshed live pulse, runs deterministic strategy agents, applies risk controls, paper-executes decisions, and generates audit-ready receipts.
 
-The product is built for the Trading Tools and Agents track. It is not a real-money betting app. Execution is paper-only by default, with devnet-compatible hooks planned for final submission.
+The product is built for the Trading Tools and Agents track. It is not a real-money betting app; execution is deliberately paper-only.
 
 ## Why It Exists
 
@@ -27,10 +27,8 @@ Implemented:
 - wallet-based TxLINE free-tier API activation
 - live TxLINE endpoint verification with `TXLINE_GUEST_JWT` and `TXLINE_API_TOKEN`
 - public Render deployment at `https://signaldesk-txline.onrender.com`
-
-Pending:
-
-- final demo video
+- verified France 2-1 Morocco incident replay derived from 66,339 TxLINE odds records
+- normal, reduced, and halted counterfactual policy results
 
 ## Local Development
 
@@ -67,7 +65,7 @@ Local SignalDesk API:
 
 ## Environment
 
-Copy `.env.example` to `.env.local` after TxLINE activation. The server loads `.env.local` at startup and keeps TxLINE tokens server-side.
+Copy `.env.example` to `.env.local` after TxLINE activation. The server loads `.env.local` at startup and keeps runtime TxLINE tokens server-side. Wallet activation helpers are enabled in local development and disabled when `NODE_ENV=production` unless explicitly overridden.
 
 ```bash
 TXLINE_API_ORIGIN=https://txline.txodds.com
@@ -87,18 +85,18 @@ Mainnet free-tier activation has been completed and deployed server-side on Rend
 - Public judge evidence endpoint: `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
 - Verification result: HTTP 200 with TxLINE fixture JSON and `liveReady: true`
 
-## TxLINE Endpoints Targeted
+## TxLINE Endpoints Used by the Submitted Evidence
 
-- `POST /auth/guest/start`
 - `GET /api/fixtures/snapshot`
-- `GET /api/odds/snapshot/{fixtureId}`
 - `GET /api/odds/updates/{fixtureId}`
-- `GET /api/odds/updates/{epochDay}/{hourOfDay}/{interval}`
-- `GET /api/odds/stream`
 - `GET /api/odds/validation`
-- `GET /api/scores/snapshot/{fixtureId}`
 - `GET /api/scores/updates/{fixtureId}`
-- `GET /api/scores/historical/{fixtureId}`
+
+## Additional Implemented Proxy Capabilities
+
+- `GET /api/odds/snapshot/{fixtureId}`
+- `GET /api/odds/stream`
+- `GET /api/scores/snapshot/{fixtureId}`
 - `GET /api/scores/stream`
 - `GET /api/scores/stat-validation`
 

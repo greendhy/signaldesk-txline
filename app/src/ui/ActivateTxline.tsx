@@ -256,7 +256,7 @@ export function ActivateTxline() {
           </div>
 
           <div className="activation-summary">
-            <KeyValue label="Program" value={config.programId.toBase58()} />
+            <KeyValue label="Program" value={config.programId} />
             <KeyValue label="Service level" value={config.serviceLevelId} />
             <KeyValue label="Weeks" value={config.weeks} />
             <KeyValue label="Wallet" value={publicKey ? shortKey(publicKey) : "not connected"} />
@@ -335,12 +335,14 @@ export function ActivateTxline() {
 
 async function buildSubscribeTransaction(connection: Connection, payer: PublicKey, network: TxlineNetwork) {
   const config = txlineNetworks[network];
+  const programId = new PublicKey(config.programId);
+  const txlTokenMint = new PublicKey(config.txlTokenMint);
   const [tokenTreasuryPda] = PublicKey.findProgramAddressSync(
     [Buffer.from("token_treasury_v2")],
-    config.programId,
+    programId,
   );
   const tokenTreasuryVault = getAssociatedTokenAddressSync(
-    config.txlTokenMint,
+    txlTokenMint,
     tokenTreasuryPda,
     true,
     TOKEN_2022_PROGRAM_ID,
@@ -348,10 +350,10 @@ async function buildSubscribeTransaction(connection: Connection, payer: PublicKe
   );
   const [pricingMatrixPda] = PublicKey.findProgramAddressSync(
     [Buffer.from("pricing_matrix")],
-    config.programId,
+    programId,
   );
   const userTokenAccount = getAssociatedTokenAddressSync(
-    config.txlTokenMint,
+    txlTokenMint,
     payer,
     false,
     TOKEN_2022_PROGRAM_ID,
@@ -365,7 +367,7 @@ async function buildSubscribeTransaction(connection: Connection, payer: PublicKe
         payer,
         userTokenAccount,
         payer,
-        config.txlTokenMint,
+        txlTokenMint,
         TOKEN_2022_PROGRAM_ID,
         ASSOCIATED_TOKEN_PROGRAM_ID,
       );
@@ -377,11 +379,11 @@ async function buildSubscribeTransaction(connection: Connection, payer: PublicKe
   data[10] = config.weeks;
 
   const instruction = new TransactionInstruction({
-    programId: config.programId,
+    programId,
     keys: [
       { pubkey: payer, isSigner: true, isWritable: true },
       { pubkey: pricingMatrixPda, isSigner: false, isWritable: false },
-      { pubkey: config.txlTokenMint, isSigner: false, isWritable: false },
+      { pubkey: txlTokenMint, isSigner: false, isWritable: false },
       { pubkey: userTokenAccount, isSigner: false, isWritable: true },
       { pubkey: tokenTreasuryVault, isSigner: false, isWritable: true },
       { pubkey: tokenTreasuryPda, isSigner: false, isWritable: false },

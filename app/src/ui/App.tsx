@@ -29,7 +29,6 @@ import type {
   RiskConfig,
   StrategyState,
 } from "../shared/types";
-import { ActivateTxline } from "./ActivateTxline";
 
 const speedOptions = [0.5, 1, 2, 4];
 
@@ -51,10 +50,6 @@ type LiveProof = {
 };
 
 export function App() {
-  if (window.location.pathname === "/activate") {
-    return <ActivateTxline />;
-  }
-
   const [mode, setMode] = useState<FeedMode>("verified-replay");
   const [scenarioId, setScenarioId] = useState(replayScenarios[0].id);
   const [risk, setRisk] = useState<RiskConfig>(defaultRiskConfig);

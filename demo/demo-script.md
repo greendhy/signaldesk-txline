@@ -1,69 +1,63 @@
-# SignalDesk Demo Script
+# SignalDesk Final Demo Runbook
 
-Target length: 3:45 to 4:20. Hard limit: 5 minutes.
+Target length: 3:41. Hard limit: 5 minutes.
 
-## 0:00 - 0:22 | Raw TxLINE input
+## 0:00 - 0:23 | Real TxLINE Input
 
-Show a black terminal view making repeated real requests to `/api/txline/pulse`. Let the request sequence, receive timestamp, latency, fixture rows, and payload hash visibly change.
+- Open the public `/api/txline/pulse` origin in a terminal-style view.
+- Re-request the live fixture snapshot so sequence, receive time, latency, fixture rows, and payload hash move on screen.
+- Establish the problem: raw sports data is fast and difficult to govern.
 
-Narration:
+## 0:23 - 0:45 | Live Mode
 
-"Raw sports data is fast, noisy, and difficult to govern. This is a real TxLINE mainnet pulse: every request has a new sequence, receive time, latency measurement, and hash. SignalDesk turns that stream into an operator-ready control plane."
+- Switch to the deployed SignalDesk application and click `Live`.
+- Point to the request sequence, fixture sample, and sanitized JSON envelope.
+- Keep the panel visible for multiple 2.5-second refreshes.
 
-Cut from the terminal to SignalDesk Live mode.
+## 0:45 - 1:05 | Verified Replay
 
-## 0:22 - 0:55 | Live mode
+- Click `Verified replay`.
+- Point to `TxLINE input verified`, `66,339 source records`, the score strip, and the selected fixture.
+- Explain that the France 2-1 Morocco incident is reconstructed from TxLINE odds and score history rather than hand-authored UI animation.
 
-Point at the request sequence and hover over the fixture rows. Wait for at least one automatic refresh so the sequence changes on screen.
+## 1:05 - 1:58 | Autonomous Agents
 
-Narration:
+- Select `0.5x` and press Play once.
+- Do not make any trade clicks after playback starts.
+- Hover Market Maker, Score Shock, Sharp Move, and Mean Reversion as each status and explanation changes.
+- Keep the moving score, price chart, progress counter, and decision tape in view.
 
-"Live mode never substitutes replay data. The backend keeps TxLINE credentials server-side, fetches the fixture snapshot, hashes the response, and refreshes this sanitized envelope every two and a half seconds."
+## 1:58 - 2:35 | Counterfactual Risk Twin
 
-## 0:55 - 1:25 | Verified incident replay
+- Point across Normal, Reduced, and Halted policy results.
+- Drag the confidence floor from 58% to 73%.
+- Replace max exposure with `35000`.
+- Click Reduced and restart at `4x`.
+- Click Halted and restart the identical replay.
+- Show all four agents as blocked, 23 blocked decisions, and `$0` executable notional.
 
-Click `Verified replay`. Point to `TxLINE input verified`, `66,339 source records`, and the France 2-1 Morocco fixture.
+## 2:35 - 2:58 | Receipts
 
-Narration:
+- Click a decision row.
+- Point to source mode, upstream endpoint, exact message ID, `txline-validated`, and the SHA-256 receipt hash.
+- Point to the public verified-input proof route.
 
-"Judging may happen between matches, so the default incident replay uses real TxLINE history: 66,339 odds records and the score event stream from the France-Morocco quarter-final. This is historical TxLINE input, not a synthetic animation."
+## 2:58 - 3:27 | Dynamic Judge Evidence
 
-## 1:25 - 2:20 | Four autonomous agents
+- Open the public `/api/judge/evidence` origin in the evidence shell.
+- Put the cursor on the curl command and press Enter twice.
+- Keep request count, live sequence, and generated-at time visible as they change.
+- Show the 10-level subtree proof, 7-level main-tree proof, and source message ID.
 
-Click `4x`, then Play. As narration names each agent, move the pointer onto the matching card and hold long enough for its hover highlight. Let goals and the probability shock visibly update the chart and decision tape.
+## 3:27 - 3:41 | Close
 
-Narration:
+- Return to the deployed dashboard and finish the replay at `4x`.
+- End on all four executed agents, the 2-1 result, three policy outcomes, receipt tape, and TxLINE-validated proof.
 
-"Once the feed starts, there are no manual trade clicks. Sharp Move follows large implied-probability changes. Score Shock reacts to goals, VAR, and penalty windows. Mean Reversion detects a controlled retrace after a market shock. Market Maker maintains two-sided paper quotes and widens its spread with volatility."
+## Required Capture Properties
 
-## 2:20 - 3:12 | Counterfactual risk twin
-
-Point across Normal, Reduced, and Halted. Drag the confidence floor, edit max exposure, click Reduced, then Halted. Restart the replay under Halted and show blocked decisions with zero notional.
-
-Narration:
-
-"The differentiator is the risk twin. SignalDesk evaluates the same TxLINE events under three policies. Normal allows about two hundred seventeen thousand dollars of paper notional. Reduced halves it. Halted blocks all twenty-three decisions and takes executable notional to zero. Operators can change the confidence floor and exposure cap, then see policy effects immediately."
-
-## 3:12 - 3:42 | Receipt and TxLINE proof
-
-Click a decision row. Point to source mode, message ID, `txline-validated`, receipt hash, and `/api/judge/verified-input`.
-
-Narration:
-
-"Each decision becomes a deterministic SHA-256 receipt. This one links back to a real TxLINE message ID. The public verification endpoint asks TxLINE for the original odds row, update summary, subtree proof, and main-tree proof, without exposing our API token."
-
-## 3:42 - 4:05 | Dynamic evidence API
-
-Open `/api/judge/evidence`. Point to `verifiedInputProof`, `counterfactualRisk`, and `generatedAt`. Refresh the browser. Make sure `generatedAt` and the live pulse sequence visibly change.
-
-Narration:
-
-"Judges can verify the whole system without trusting the UI. This endpoint recomputes live feed evidence, all four agents, all three risk policies, and the TxLINE proof summary. Refreshing creates a new timestamp and request sequence because this is a running backend."
-
-## 4:05 - 4:18 | Close
-
-Return to the finished dashboard.
-
-Narration:
-
-"SignalDesk makes TxLINE deployable as a governed trading data layer: real input, autonomous decisions, counterfactual controls, and verifiable receipts."
+- Chrome controlled only through CDP port `9888` and Playwright `connectOverCDP`.
+- Browser window fully visible at 1920x1080 output with no other application covering it.
+- Real pointer movement, hover, clicks, drag, text entry, and repeated network requests.
+- Natural English narration aligned to the segment boundaries.
+- H.264 video, AAC audio, normalized near -16 dB, under five minutes.

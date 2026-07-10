@@ -22,7 +22,7 @@ SignalDesk is a control plane for autonomous sports-trading agents, not another 
 - Counterfactual policy comparison across normal, reduced, and halted modes.
 - Confidence floor, exposure cap, reduced sizing, and a kill switch.
 - Decision receipts tied to TxLINE message IDs and the sponsor's Merkle validation endpoint.
-- Server-side credentials; API tokens never enter the browser.
+- Runtime data routes keep TxLINE credentials server-side; public production wallet activation is disabled.
 - Deterministic replay for judging when no match is live.
 
 ## Verifiable Data Chain
@@ -54,11 +54,20 @@ pnpm dev
 
 Open `http://127.0.0.1:5173`. The API runs on `http://127.0.0.1:8790`.
 
+## TxLINE Endpoints Used
+
+- `GET /api/fixtures/snapshot` - fresh Live-mode pulse
+- `GET /api/odds/updates/18209181` - verified odds history used to build the incident replay
+- `GET /api/scores/updates/18209181` - verified score-event history used to build the incident replay
+- `GET /api/odds/validation` - original message plus subtree and main-tree proof
+
+SignalDesk also implements authenticated proxy routes for odds/score snapshots, streams, and score-stat validation. They are exposed as integration capabilities, not counted as evidence inputs for the submitted replay.
+
 ## Structure
 
 - `app/` - React dashboard, Express API, strategy engine, and tests
 - `docs/` - technical overview, product strategy, and competitor notes
-- `demo/` - screenshots, recording script, and video work files
+- `demo/` - screenshots and the judge-demo walkthrough
 - `submission/` - Superteam submission copy
 
 ## Deployment

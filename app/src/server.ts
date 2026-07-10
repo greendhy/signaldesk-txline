@@ -125,6 +125,10 @@ app.get("/api/judge/verified-input", async (_req, res) => {
 });
 
 app.post("/api/activation/guest", async (req, res) => {
+  if (!activationEnabled()) {
+    res.status(403).json({ error: "Wallet activation is disabled on the public production service." });
+    return;
+  }
   const network = normalizeNetwork(req.body?.network);
   if (!network) {
     res.status(400).json({ error: "Invalid network" });
@@ -143,6 +147,10 @@ app.post("/api/activation/guest", async (req, res) => {
 });
 
 app.post("/api/activation/activate", async (req, res) => {
+  if (!activationEnabled()) {
+    res.status(403).json({ error: "Wallet activation is disabled on the public production service." });
+    return;
+  }
   const network = normalizeNetwork(req.body?.network);
   const { txSig, walletSignature, jwt } = req.body || {};
 
@@ -238,6 +246,10 @@ function hasLiveCredentials() {
   return Boolean(process.env.TXLINE_GUEST_JWT && process.env.TXLINE_API_TOKEN);
 }
 
+function activationEnabled() {
+  return process.env.ENABLE_TXLINE_ACTIVATION === "true" || process.env.NODE_ENV !== "production";
+}
+
 function loadLocalEnv() {
   const envPath = path.resolve(process.cwd(), ".env.local");
   if (!fs.existsSync(envPath)) return;
@@ -295,7 +307,7 @@ async function buildJudgeEvidence() {
   const counterfactualRisk = buildCounterfactualRisk(scenario);
 
   return {
-    project: "SignalDesk: Verifiable TxLINE Trading Command Center",
+    project: "SignalDesk: TxLINE Counterfactual Risk Control Plane",
     track: "Trading Tools and Agents",
     appUrl: "https://signaldesk-txline.onrender.com",
     repoUrl: "https://github.com/greendhy/signaldesk-txline",
@@ -339,10 +351,7 @@ async function buildJudgeEvidence() {
       "/api/fixtures/snapshot",
       "/api/odds/updates/{fixtureId}",
       "/api/scores/updates/{fixtureId}",
-      "/api/odds/stream",
-      "/api/scores/stream",
       "/api/odds/validation",
-      "/api/scores/stat-validation",
     ],
     generatedAt: new Date().toISOString(),
   };

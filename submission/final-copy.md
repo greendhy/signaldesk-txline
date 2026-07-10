@@ -52,12 +52,7 @@ Mainnet subscription transaction:
 - `/api/fixtures/snapshot`
 - `/api/odds/updates/{fixtureId}`
 - `/api/scores/updates/{fixtureId}`
-- `/api/odds/snapshot/{fixtureId}`
-- `/api/scores/snapshot/{fixtureId}`
-- `/api/odds/stream`
-- `/api/scores/stream`
 - `/api/odds/validation`
-- `/api/scores/stat-validation`
 
 ## TxLINE API Feedback
 

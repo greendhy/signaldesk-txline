@@ -19,6 +19,7 @@ ENV PORT=8790
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 COPY --from=build /app/package.json /app/pnpm-lock.yaml ./
 COPY --from=build /app/node_modules ./node_modules
+RUN pnpm prune --prod
 COPY --from=build /app/src ./src
 COPY --from=build /app/dist ./dist
 EXPOSE 8790
