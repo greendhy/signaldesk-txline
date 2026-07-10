@@ -2,42 +2,101 @@
 
 ## Core Idea
 
-SignalDesk turns TxLINE odds and score updates into an auditable autonomous decision workflow. The app is designed to make three things obvious during judge review:
+SignalDesk is a counterfactual risk control plane for autonomous TxLINE trading agents. It makes four things independently testable:
 
-1. TxLINE can drive automated strategy logic.
-2. Decisions are deterministic and risk-controlled.
-3. Each decision can be tied back to a specific feed event and proof path.
+1. The backend has live TxLINE access.
+2. The default incident replay contains real TxLINE odds and score events.
+3. Strategy and risk decisions are deterministic.
+4. A decision can be traced from a TxLINE message and Merkle proof to a SHA-256 receipt.
 
 ## Architecture
 
 ```text
-TxLINE feed or replay scenario
-  -> normalized odds/score event
-  -> strategy engine
-  -> risk engine
-  -> paper execution decision
-  -> SHA-256 receipt
-  -> judge dashboard
+TxLINE live pulse or verified incident replay
+  -> normalized odds and score event
+  -> four deterministic strategy agents
+  -> normal / reduced / halted policy twins
+  -> paper execution or policy block
+  -> SHA-256 decision receipt
+  -> judge evidence API and dashboard
 ```
 
-## Services
+## Verified Incident Dataset
 
-- React/Vite dashboard.
-- Node/Express API.
-- Shared TypeScript strategy engine used by both dashboard and API.
-- Replay mode for guaranteed judge demo availability.
-- Live TxLINE mode with server-side credentials.
-- Public Render deployment: `https://signaldesk-txline.onrender.com`.
+The default replay is the France 2-1 Morocco World Cup quarter-final, fixture `18209181`.
 
-## Local API
+- Source: `GET /api/odds/updates/18209181` and `GET /api/scores/updates/18209181`
+- Raw TxLINE odds records inspected: `66,339`
+- Replay events selected: match-winner prices plus kickoff, VAR, penalty, goals, cards, and full time
+- Sample verified message: `1837057453:00003:000133-10021-stab`
+- Sample timestamp: `1783632662348`
+- Proof: `GET /api/odds/validation?messageId=...&ts=...`
+
+The proof response contains the original odds row, batch update statistics, a subtree proof, and a main-tree proof. SignalDesk exposes a sanitized summary at `GET /api/judge/verified-input`.
+
+## Live Mode
+
+`GET /api/txline/pulse` makes a fresh server-side call to TxLINE's fixture snapshot. Each response includes:
+
+- monotonic request sequence
+- requested and received timestamps
+- upstream latency and HTTP status
+- live fixture count and a three-row sample
+- SHA-256 hash of the upstream response body
+
+The dashboard polls this endpoint every 2.5 seconds in Live mode. It never substitutes replay data into the Live panel.
+
+## Risk Twin
+
+Every replay event is evaluated three times with identical inputs:
+
+- `normal`: full risk-approved paper notional
+- `reduced`: half-sized executable and quoted notional
+- `halted`: kill switch blocks every decision and sets executable notional to zero
+
+The UI reports passed decisions, blocked decisions, executable notional, and notional prevented versus normal. The user-facing controls also allow confidence-floor and maximum-exposure changes.
+
+## Agents
+
+### Sharp Move
+
+Compares consecutive de-margined implied probabilities. A move of at least 3.5 percentage points creates a momentum proposal. Confidence and notional scale with move size and observed volatility.
+
+### Mean Reversion
+
+Detects a controlled retrace after an implied-probability shock of at least 8 percentage points. It requires an opposite-direction retrace and elevated volatility before proposing a fade.
+
+### Score Shock
+
+Reacts to TxLINE goal, red-card, VAR, and penalty events. Confirmed goals reprice toward the scoring side; VAR and penalty windows pause execution.
+
+### Market Maker
+
+Maintains paper two-sided quotes around TxLINE consensus prices. Quote spread widens with realized probability volatility.
+
+## Receipt Model
+
+Each receipt stores:
+
+- source mode and fixture ID
+- TxLINE endpoint and source message/event ID
+- event and decision timestamps
+- proof status and public proof path
+- SHA-256 hash of the canonical decision payload
+
+For the verified replay, receipt proof status is `txline-validated`.
+
+## Public API
 
 - `GET /api/health`
+- `GET /api/txline/status`
+- `GET /api/txline/pulse`
+- `GET /api/judge/evidence`
+- `GET /api/judge/verified-input`
 - `GET /api/replay/scenarios`
 - `GET /api/replay/scenarios/:id`
 - `GET /api/replay/stream/:id`
 - `POST /api/engine/run/:id`
-- `GET /api/txline/status`
-- `GET /api/judge/evidence`
 - `GET /api/txline/fixtures`
 - `GET /api/txline/odds/snapshot/:fixtureId`
 - `GET /api/txline/scores/snapshot/:fixtureId`
@@ -46,79 +105,27 @@ TxLINE feed or replay scenario
 - `GET /api/txline/odds/validation`
 - `GET /api/txline/scores/stat-validation`
 
-Public verification endpoints:
+## TxLINE Integration
 
-- `GET https://signaldesk-txline.onrender.com/api/health`
-- `GET https://signaldesk-txline.onrender.com/api/txline/status`
-- `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
-- `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
-
-## Agents
-
-### Sharp Move
-
-Reads implied-probability deltas from match-winner odds. It emits a momentum signal when a rolling move crosses threshold.
-
-### Mean Reversion
-
-Looks for decelerating movement after a high-volatility run. It only fires when the market has moved hard and then loses acceleration.
-
-### Score Shock
-
-Consumes score events such as goal, red card, VAR, and corner. It converts match events into execution, pause, or risk-reduction actions.
-
-### Market Maker
-
-Maintains paper two-sided quotes around the current consensus price. It widens spread as volatility rises.
-
-## Risk Controls
-
-- Confidence floor.
-- Maximum exposure.
-- Maximum single notional.
-- Strategy cooldown.
-- Reduced mode.
-- Kill switch.
-
-## TxLINE Integration Plan
-
-Live credentials are intentionally server-side only.
-
-Mainnet activation proof:
-
-- Network: Solana mainnet
-- TxLINE service level: 12
-- Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
-- Activated at: `2026-07-07T11:05:48.470Z`
-- Live fixture snapshot verified locally and publicly: `GET /api/txline/fixtures` returned HTTP 200 with TxLINE fixture JSON.
-- Judge evidence endpoint returns live fixture count, TxLINE credential status, autonomous replay decision count, triggered agents, and a sample SHA-256 receipt without exposing API tokens.
-
-Required headers:
+Credentials are server-side only. Requests use:
 
 ```text
 Authorization: Bearer ${TXLINE_GUEST_JWT}
 X-Api-Token: ${TXLINE_API_TOKEN}
 ```
 
-Target endpoints:
+Mainnet service level 12 activation transaction:
 
-- fixtures snapshot
-- odds snapshot and updates
-- odds SSE stream
-- odds validation proof
-- scores snapshot and updates
-- scores SSE stream
-- score stat validation proof
+`5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 
-## Judge Demo Safety
+## Verification
 
-Because live matches may not be active during review, replay mode ships with TxLINE-shaped scenarios that still exercise the full autonomous path:
+```bash
+cd app
+pnpm test
+pnpm build
+```
 
-- odds movement
-- score shock
-- VAR uncertainty
-- risk throttling
-- market-maker quoting
-- receipt generation
+The test suite checks real-data provenance, all four agent triggers, policy separation, kill-switch behavior, and deterministic receipt hashes.
 
-Live mode is active when server credentials are configured, and replay mode remains available for deterministic judge review.
+`pnpm audit:replay` re-fetches the source odds history, parses the score SSE history, and validates the sample TxLINE message without writing credentials or raw data to disk.

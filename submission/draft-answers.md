@@ -2,58 +2,57 @@
 
 ## Project Title
 
-SignalDesk: Verifiable TxLINE Trading Command Center
+SignalDesk: TxLINE Counterfactual Risk Control Plane
 
 ## Brief Explanation
 
-SignalDesk is an autonomous trading operations workbench for TxLINE. It ingests live or replayed odds and score feeds, runs deterministic strategy agents, applies risk controls, paper-executes decisions, and generates SHA-256 decision receipts tied to TxLINE event IDs and proof endpoints.
+SignalDesk is a governed execution workbench for autonomous TxLINE trading agents. It combines a continuously refreshing live TxLINE pulse with a verified France 2-1 Morocco incident replay, runs four deterministic strategies, and evaluates the same events under normal, reduced, and halted risk policies. Every paper decision produces a SHA-256 receipt tied to a TxLINE source message and public Merkle-proof path.
 
-## Live MVP
+Its novel feature is a counterfactual risk twin: judges can see not only what an agent proposed, but what each policy would pass, resize, or block and the paper exposure prevented by each policy.
 
-https://signaldesk-txline.onrender.com
+## Links
 
-Public verification endpoints:
-
-- `GET https://signaldesk-txline.onrender.com/api/health`
-- `GET https://signaldesk-txline.onrender.com/api/txline/status`
-- `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
-- `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
-
-Render deployment is live with server-side TxLINE credentials. `GET /api/txline/fixtures` returns HTTP 200 with live TxLINE fixture JSON. `GET /api/judge/evidence` gives judges a machine-readable proof bundle: live fixture status, autonomous decision count, triggered agents, risk controls, TxLINE endpoints used, and a sample SHA-256 receipt hash.
-
-## Demo Video
-
-Pending recording.
-
-## Public Repository
-
-https://github.com/greendhy/signaldesk-txline
-
-## Technical Documentation
-
-Use `docs/technical-overview.md`.
+- App: https://signaldesk-txline.onrender.com
+- Repo: https://github.com/greendhy/signaldesk-txline
+- Technical docs: https://github.com/greendhy/signaldesk-txline/blob/main/docs/technical-overview.md
+- Judge evidence: https://signaldesk-txline.onrender.com/api/judge/evidence
+- Verified input proof: https://signaldesk-txline.onrender.com/api/judge/verified-input
+- Live pulse: https://signaldesk-txline.onrender.com/api/txline/pulse
+- Demo video: pending final recording and user approval
 
 ## Live TxLINE Proof
 
-- Mainnet subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
-- Activation time: `2026-07-07T11:05:48.470Z`
-- Local verification: `GET /api/txline/fixtures` returned HTTP 200 with live fixture JSON.
-- Public verification: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures` returned HTTP 200 with live fixture JSON.
-- Public health: `GET https://signaldesk-txline.onrender.com/api/health` reports `liveReady: true`.
-- Judge evidence: `GET https://signaldesk-txline.onrender.com/api/judge/evidence` reports live TxLINE fixtures and autonomous strategy receipts without exposing credentials.
+- Mainnet service level 12 is active with server-side JWT/API-token credentials.
+- Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
+- `/api/txline/pulse` makes a fresh fixture-snapshot request and returns sequence, receive time, latency, fixture count, and payload hash.
+- The default replay was derived from 66,339 TxLINE odds records and the score event stream for fixture `18209181`.
+- `/api/judge/verified-input` confirms sample message `1837057453:00003:000133-10021-stab` through TxLINE's odds-validation proof.
+
+## TxLINE Endpoints Used
+
+- `/api/fixtures/snapshot`
+- `/api/odds/updates/{fixtureId}`
+- `/api/scores/updates/{fixtureId}`
+- `/api/odds/snapshot/{fixtureId}`
+- `/api/scores/snapshot/{fixtureId}`
+- `/api/odds/stream`
+- `/api/scores/stream`
+- `/api/odds/validation`
+- `/api/scores/stat-validation`
 
 ## TxLINE API Feedback
 
 What worked well:
 
-- The separation between fixtures, odds, scores, streams, and validation endpoints makes it possible to build a clean ingestion layer.
-- SSE streams are a strong fit for autonomous agents.
-- The Merkle proof endpoints are a differentiator for trading and settlement workflows.
-- Replay/historical endpoints are important because judging may happen outside live match windows.
+- StablePrice de-margined percentages are strong deterministic strategy inputs.
+- Historical updates plus SSE streams support both production monitoring and reliable judging.
+- Merkle validation creates a compelling provenance chain for autonomous decisions.
+- Server-side credentials fit a B2B control-plane architecture.
 
 Friction:
 
-- Activation requires wallet flow plus guest JWT plus API token, so hackathon starter code should include a minimal copy-paste activation CLI.
-- The activation endpoint can return a plain text token, so clients should document response format and idempotency clearly.
-- The docs expose many field shapes; a downloadable TypeScript SDK or OpenAPI spec would reduce integration risk.
-- More realistic sample payloads for soccer odds and score updates would speed local testing before live credentials are ready.
+- Odds `Pct` values can be `"NA"`, so a typed SDK should model numeric-or-missing values.
+- Completed fixtures can have empty snapshots; docs should point builders to historical update endpoints.
+- `/api/scores/updates/{fixtureId}` returns SSE-formatted history, which should be more explicit in the API reference.
+- A generated TypeScript SDK with response types and SSE parsing would materially reduce integration time.
+- Token activation can return plain text; response format and idempotency should be documented.

@@ -1,8 +1,141 @@
 import type { ReplayScenario } from "./types";
 
 const baseTs = Date.UTC(2026, 6, 6, 19, 0, 0);
+const verifiedStartTs = Date.UTC(2026, 6, 9, 20, 0, 0);
 
 export const replayScenarios: ReplayScenario[] = [
+  {
+    id: "france-morocco-verified",
+    name: "France 2-1 Morocco - TxLINE verified",
+    description:
+      "A real World Cup quarter-final incident replay derived from 66,339 TxLINE odds records and the TxLINE score event stream.",
+    fixture: {
+      fixtureId: 18209181,
+      competition: "World Cup - Quarter-finals",
+      participant1: "France",
+      participant2: "Morocco",
+      startTime: verifiedStartTs,
+    },
+    provenance: {
+      kind: "txline-verified",
+      sourceEndpoint: "/api/odds/updates/18209181 + /api/scores/updates/18209181",
+      sourceRecordCount: 66_339,
+      sampleMessageId: "1837057453:00003:000133-10021-stab",
+      sampleTimestamp: 1_783_632_662_348,
+      proofEndpoint:
+        "/api/txline/odds/validation?messageId=1837057453%3A00003%3A000133-10021-stab&ts=1783632662348",
+      capturedAt: "2026-07-10T02:00:00.000Z",
+    },
+    events: [
+      verifiedOdds(
+        1_783_627_226_058,
+        "1837047901:00003:000209-10021-stab",
+        [1.636, 4.219, 6.591],
+        [0.61125, 0.23702, 0.15172],
+        "H1",
+      ),
+      verifiedScore(1_783_627_232_309, "score-18209181-17", 0, "H1", "kickoff", 0, 0, 0.1, 2),
+      verifiedOdds(
+        1_783_627_916_924,
+        "1837049114:00003:000208-10021-stab",
+        [1.598, 4.057, 7.826],
+        [0.62578, 0.24649, 0.12778],
+        "H1",
+      ),
+      verifiedOdds(
+        1_783_628_724_289,
+        "1837050525:00003:000095-1-10021-stab",
+        [1.593, 3.992, 8.216],
+        [0.62775, 0.2505, 0.12171],
+        "H1",
+      ),
+      verifiedScore(1_783_628_805_796, "score-18209181-318", 26, "H1", "var", 0, 0, 0.9),
+      verifiedScore(1_783_628_927_782, "score-18209181-323", 28, "H1", "penalty", 0, 0, 0.82, 1),
+      verifiedOdds(
+        1_783_628_938_803,
+        "1837050921:00003:000319-10021-stab",
+        [1.612, 3.875, 8.23],
+        [0.62035, 0.25806, 0.12151],
+        "H1",
+      ),
+      verifiedOdds(
+        1_783_629_837_972,
+        "1837052540:00003:000311-10021-stab",
+        [1.633, 3.668, 8.687],
+        [0.61237, 0.27263, 0.11511],
+        "H1",
+      ),
+      verifiedOdds(
+        1_783_630_105_814,
+        "1837053013:00003:000184-10021-stab",
+        [1.62, 3.62, 9.393],
+        [0.61728, 0.27624, 0.10646],
+        "H1",
+      ),
+      verifiedOdds(
+        1_783_630_174_277,
+        "1837053136:00003:000105-10021-stab",
+        [1.62, 3.594, 9.588],
+        [0.61728, 0.27824, 0.1043],
+        "H1",
+      ),
+      verifiedScore(1_783_630_178_066, "score-18209181-534", 49, "H1", "goal", 0, 1, 1, 2),
+      verifiedOdds(
+        1_783_630_216_681,
+        "1837053214:00003:000448-10021-stab",
+        [1.667, 3.493, 8.798],
+        [0.59988, 0.28629, 0.11366],
+        "H1",
+      ),
+      verifiedScore(1_783_630_607_087, "score-18209181-551", 45, "HT", "halftime", 0, 1, 0.2),
+      verifiedOdds(
+        1_783_630_912_818,
+        "1837054493:00003:000017-10021-stab",
+        [1.674, 3.469, 8.749],
+        [0.59737, 0.28827, 0.1143],
+        "H2",
+      ),
+      verifiedOdds(
+        1_783_631_698_217,
+        "1837055847:00003:000021-10021-stab",
+        [1.725, 3.239, 8.952],
+        [0.57971, 0.30874, 0.11171],
+        "H2",
+      ),
+      verifiedOdds(
+        1_783_632_150_970,
+        "1837056628:00003:000092-10021-stab",
+        [1.883, 2.777, 9.182],
+        [0.53107, 0.3601, 0.10891],
+        "H2",
+      ),
+      verifiedScore(1_783_632_227_774, "score-18209181-738", 59, "H2", "goal", 1, 1, 1, 1),
+      verifiedOdds(
+        1_783_632_293_319,
+        "1837056866:00003:000173-10021-stab",
+        [1.135, 10.7, 39.3],
+        [0.88106, 0.09346, 0.02545],
+        "H2",
+      ),
+      verifiedScore(1_783_632_440_408, "score-18209181-764", 63, "H2", "yellow-card", 1, 1, 0.35, 2),
+      verifiedOdds(
+        1_783_632_579_017,
+        "1837057321:00003:000003-10021-stab",
+        [1.159, 8.612, 47.5],
+        [0.86281, 0.11612, 0.02105],
+        "H2",
+      ),
+      verifiedScore(1_783_632_590_354, "score-18209181-793", 65, "H2", "goal", 2, 1, 1, 1),
+      verifiedOdds(
+        1_783_632_662_348,
+        "1837057453:00003:000133-10021-stab",
+        [1.02, 58, 290],
+        [0.98039, 0.01724, 0.00345],
+        "H2",
+      ),
+      verifiedScore(1_783_634_788_478, "score-18209181-1114", 90, "FT", "full-time", 2, 1, 0.1),
+    ].sort((a, b) => a.event.ts - b.event.ts),
+  },
   {
     id: "late-goal-volatility",
     name: "Late goal volatility",
@@ -146,6 +279,65 @@ export const replayScenarios: ReplayScenario[] = [
     ],
   },
 ];
+
+function verifiedOdds(
+  ts: number,
+  messageId: string,
+  prices: number[],
+  implied: number[],
+  gameState: string,
+) {
+  return {
+    offsetMs: ts - verifiedStartTs,
+    source: "txline-verified-replay" as const,
+    event: {
+      kind: "odds" as const,
+      fixtureId: 18_209_181,
+      messageId,
+      ts,
+      bookmaker: "TXLineStablePriceDemargined",
+      market: "match-winner" as const,
+      marketPeriod: "in-play" as const,
+      gameState,
+      participant1: "France",
+      participant2: "Morocco",
+      priceNames: ["France", "Draw", "Morocco"],
+      prices,
+      implied,
+      inRunning: true,
+    },
+  };
+}
+
+function verifiedScore(
+  ts: number,
+  eventId: string,
+  minute: number,
+  gameState: string,
+  action: "kickoff" | "goal" | "yellow-card" | "var" | "penalty" | "halftime" | "full-time",
+  participant1Goals: number,
+  participant2Goals: number,
+  severity: number,
+  participant?: 1 | 2,
+) {
+  return {
+    offsetMs: ts - verifiedStartTs,
+    source: "txline-verified-replay" as const,
+    event: {
+      kind: "score" as const,
+      fixtureId: 18_209_181,
+      eventId,
+      ts,
+      minute,
+      gameState,
+      action,
+      participant,
+      participant1Goals,
+      participant2Goals,
+      severity,
+    },
+  };
+}
 
 function odds(
   offsetMs: number,

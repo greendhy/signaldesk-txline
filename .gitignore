@@ -7,3 +7,8 @@ app/.env.local
 app/activation-result.json
 app/*.log
 *.log
+demo/video-work/audio/
+demo/video-work/recordings/
+demo/video-work/thumbs/
+demo/video-work/thumbs-v2/
+demo/video-work/visuals.webm

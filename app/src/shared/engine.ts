@@ -135,13 +135,16 @@ function meanReversionAgent(
 
   const recent = state.oddsHistory.slice(-4);
   const changes = recent.slice(1).map((item, index) => item.implied[0] - recent[index].implied[0]);
-  const sameDirection = changes.every((change) => Math.sign(change) === Math.sign(changes[0]));
-  const decelerating = Math.abs(changes[2]) < Math.abs(changes[1]) && Math.abs(changes[1]) > 0.025;
+  const impulse = changes[1];
+  const retrace = changes[2];
+  const reversed = Math.sign(retrace) !== Math.sign(impulse);
+  const stretched = Math.abs(impulse) >= 0.08;
+  const controlledRetrace = Math.abs(retrace) >= 0.008 && Math.abs(retrace) <= Math.abs(impulse) * 0.5;
 
-  if (!sameDirection || !decelerating || state.volatility < 0.035) return undefined;
+  if (!reversed || !stretched || !controlledRetrace || state.volatility < 0.02) return undefined;
 
-  const side: TradeSide = changes[0] > 0 ? "lay-participant-1" : "back-participant-1";
-  const confidence = clamp(55 + state.volatility * 520 - Math.abs(changes[2]) * 120, 0, 88);
+  const side: TradeSide = impulse > 0 ? "lay-participant-1" : "back-participant-1";
+  const confidence = clamp(60 + Math.abs(impulse) * 55 + state.volatility * 240, 0, 90);
 
   return makeDecision({
     agent: "mean-reversion",
@@ -151,7 +154,7 @@ function meanReversionAgent(
     confidence,
     notional: Math.round(3_500 + state.volatility * 35_000),
     price: event.prices[0],
-    reason: `Momentum is decelerating after a ${formatPct(changes[0] + changes[1] + changes[2])} run; fade only if risk accepts.`,
+    reason: `Probability retraced ${formatPct(retrace)} after a ${formatPct(impulse)} shock; fade only if risk accepts.`,
   });
 }
 
@@ -161,7 +164,7 @@ function scoreShockAgent(
   mode: FeedMode,
 ): AgentDecision | undefined {
   if (event.kind !== "score") return undefined;
-  if (!["goal", "red-card", "var"].includes(event.action)) return undefined;
+  if (!["goal", "red-card", "var", "penalty"].includes(event.action)) return undefined;
 
   let side: TradeSide = "hold";
   let notional = 0;
@@ -185,6 +188,13 @@ function scoreShockAgent(
     notional = 0;
     confidence = 74;
     reason = "VAR uncertainty detected; execution pauses while market-maker spread widens.";
+  }
+
+  if (event.action === "penalty") {
+    side = "hold";
+    notional = 0;
+    confidence = 78;
+    reason = "Penalty review window detected; execution pauses until the market reprices.";
   }
 
   return makeDecision({
@@ -242,7 +252,12 @@ function makeDecision(params: {
     sourceMessageId,
     eventTimestamp: params.event.ts,
     generatedAt,
-    proofStatus: params.mode === "live" ? "pending-live-token" : "simulated",
+    proofStatus:
+      params.mode === "verified-replay"
+        ? "txline-validated"
+        : params.mode === "live"
+          ? "pending-live-token"
+          : "simulated",
     payload: {
       agent: params.agent,
       event: params.event,
@@ -301,6 +316,10 @@ function applyRisk(
   }
 
   if (updated.status === "executed") {
+    if (riskConfig.mode === "reduced") {
+      updated.notional = Math.round(updated.notional * 0.5);
+      updated.riskNote = "Reduced mode halves executable strategy notional.";
+    }
     state.exposureBySide[updated.side] = currentExposure + updated.notional;
     state.lastDecisionAt[updated.agent] = updated.at;
   }
@@ -344,9 +363,11 @@ function makeReceipt(input: {
     generatedAt: input.generatedAt,
     proofStatus: input.proofStatus,
     proofHint:
-      input.proofStatus === "pending-live-token"
-        ? "Use /api/odds/validation or /api/scores/stat-validation after API activation."
-        : "Replay receipt mirrors the TxLINE proof shape for demo review.",
+      input.proofStatus === "txline-validated"
+        ? `/api/txline/odds/validation?messageId=${encodeURIComponent(input.sourceMessageId)}&ts=${input.eventTimestamp}`
+        : input.proofStatus === "pending-live-token"
+          ? "Use /api/odds/validation or /api/scores/stat-validation after API activation."
+          : "Synthetic stress-test receipt mirrors the TxLINE proof shape.",
   };
 }
 

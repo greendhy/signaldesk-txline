@@ -1,17 +1,20 @@
 import cors from "cors";
 import express from "express";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defaultRiskConfig, runScenario } from "./shared/engine";
 import { replayScenarios } from "./shared/replayScenarios";
 import { txlineNetworks, type TxlineNetwork } from "./shared/txlineConfig";
+import type { ReplayScenario, RiskMode } from "./shared/types";
 
 loadLocalEnv();
 
 const app = express();
 const port = Number(process.env.PORT || 8790);
 const apiOrigin = process.env.TXLINE_API_ORIGIN || "https://txline.txodds.com";
+let txlineRequestSequence = 0;
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
@@ -20,7 +23,7 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     service: "SignalDesk",
-    mode: "replay-first",
+    mode: "live-plus-verified-replay",
     txline: txlineStatus(),
   });
 });
@@ -100,8 +103,25 @@ app.get("/api/txline/status", (_req, res) => {
   res.json(txlineStatus());
 });
 
+app.get("/api/txline/pulse", async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const pulse = await fetchTxlinePulse();
+  res.status(pulse.status === "verified" ? 200 : 502).json(pulse);
+});
+
 app.get("/api/judge/evidence", async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   res.json(await buildJudgeEvidence());
+});
+
+app.get("/api/judge/verified-input", async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  const scenario = replayScenarios.find((item) => item.provenance);
+  if (!scenario?.provenance) {
+    res.status(404).json({ error: "Verified replay metadata is not configured." });
+    return;
+  }
+  res.json(await fetchOddsValidationEvidence(scenario.provenance.sampleMessageId, scenario.provenance.sampleTimestamp));
 });
 
 app.post("/api/activation/guest", async (req, res) => {
@@ -250,6 +270,8 @@ function txlineStatus() {
     liveReady: hasLiveCredentials(),
     endpoints: [
       "/api/fixtures/snapshot",
+      "/api/odds/updates/{fixtureId}",
+      "/api/scores/updates/{fixtureId}",
       "/api/odds/stream",
       "/api/scores/stream",
       "/api/odds/validation",
@@ -260,10 +282,17 @@ function txlineStatus() {
 
 async function buildJudgeEvidence() {
   const scenario = replayScenarios[0];
-  const ticks = runScenario(scenario, defaultRiskConfig, "replay");
+  const sourceMode = scenario.provenance ? "verified-replay" : "replay";
+  const ticks = runScenario(scenario, defaultRiskConfig, sourceMode);
   const decisions = ticks.flatMap((tick) => tick.decisions);
   const firstReceipt = decisions.find((decision) => decision.receipt.payloadHash);
-  const liveFixtures = await fetchLiveFixtureEvidence();
+  const [liveFixtures, verifiedInputProof] = await Promise.all([
+    fetchLiveFixtureEvidence(),
+    scenario.provenance
+      ? fetchOddsValidationEvidence(scenario.provenance.sampleMessageId, scenario.provenance.sampleTimestamp)
+      : Promise.resolve({ status: "not-configured" }),
+  ]);
+  const counterfactualRisk = buildCounterfactualRisk(scenario);
 
   return {
     project: "SignalDesk: Verifiable TxLINE Trading Command Center",
@@ -280,6 +309,13 @@ async function buildJudgeEvidence() {
       replayEvents: scenario.events.length,
       decisionsGenerated: decisions.length,
       agentsTriggered: Array.from(new Set(decisions.map((decision) => decision.agentLabel))),
+      source: scenario.provenance
+        ? {
+            kind: scenario.provenance.kind,
+            sourceRecords: scenario.provenance.sourceRecordCount,
+            sourceEndpoint: scenario.provenance.sourceEndpoint,
+          }
+        : { kind: "synthetic-stress-test" },
       sampleReceipt: firstReceipt
         ? {
             receiptId: firstReceipt.receipt.receiptId,
@@ -297,8 +333,12 @@ async function buildJudgeEvidence() {
       maxSingleNotional: defaultRiskConfig.maxSingleNotional,
       modes: ["normal", "reduced", "halted"],
     },
+    counterfactualRisk,
+    verifiedInputProof,
     txlineEndpointsUsed: [
       "/api/fixtures/snapshot",
+      "/api/odds/updates/{fixtureId}",
+      "/api/scores/updates/{fixtureId}",
       "/api/odds/stream",
       "/api/scores/stream",
       "/api/odds/validation",
@@ -308,11 +348,61 @@ async function buildJudgeEvidence() {
   };
 }
 
+function buildCounterfactualRisk(scenario: ReplayScenario) {
+  const modes: RiskMode[] = ["normal", "reduced", "halted"];
+  const summaries = modes.map((mode) => {
+    const decisions = runScenario(
+      scenario,
+      { ...defaultRiskConfig, mode },
+      scenario.provenance ? "verified-replay" : "replay",
+    ).flatMap((tick) => tick.decisions);
+
+    return {
+      mode,
+      decisions: decisions.length,
+      executed: decisions.filter((decision) => decision.status === "executed").length,
+      quoted: decisions.filter((decision) => decision.status === "quoted").length,
+      blocked: decisions.filter((decision) => decision.status === "blocked").length,
+      executableNotional: decisions
+        .filter((decision) => decision.status === "executed" || decision.status === "quoted")
+        .reduce((sum, decision) => sum + decision.notional, 0),
+    };
+  });
+  const normalNotional = summaries.find((summary) => summary.mode === "normal")?.executableNotional || 0;
+
+  return summaries.map((summary) => ({
+    ...summary,
+    notionalPreventedVsNormal: Math.max(0, normalNotional - summary.executableNotional),
+  }));
+}
+
 async function fetchLiveFixtureEvidence() {
+  const pulse = await fetchTxlinePulse();
+  return {
+    status: pulse.status,
+    count: pulse.fixtureCount,
+    sample: pulse.sample,
+    sequence: pulse.sequence,
+    receivedAt: pulse.receivedAt,
+    latencyMs: pulse.latencyMs,
+    payloadHash: pulse.payloadHash,
+  };
+}
+
+async function fetchTxlinePulse() {
+  const sequence = ++txlineRequestSequence;
+  const requestedAt = new Date().toISOString();
+  const startedAt = Date.now();
+
   if (!hasLiveCredentials()) {
     return {
       status: "missing-credentials",
-      count: 0,
+      sequence,
+      requestedAt,
+      receivedAt: new Date().toISOString(),
+      latencyMs: Date.now() - startedAt,
+      fixtureCount: 0,
+      payloadHash: null,
       sample: [],
     };
   }
@@ -325,7 +415,15 @@ async function fetchLiveFixtureEvidence() {
     const fixtures = JSON.parse(text);
     return {
       status: response.ok ? "verified" : `http-${response.status}`,
-      count: Array.isArray(fixtures) ? fixtures.length : 0,
+      source: "TxLINE mainnet",
+      endpoint: "/api/fixtures/snapshot",
+      sequence,
+      requestedAt,
+      receivedAt: new Date().toISOString(),
+      latencyMs: Date.now() - startedAt,
+      upstreamStatus: response.status,
+      fixtureCount: Array.isArray(fixtures) ? fixtures.length : 0,
+      payloadHash: createHash("sha256").update(text).digest("hex"),
       sample: Array.isArray(fixtures)
         ? fixtures.slice(0, 3).map((fixture) => ({
             fixtureId: fixture.FixtureId,
@@ -339,9 +437,56 @@ async function fetchLiveFixtureEvidence() {
   } catch (error) {
     return {
       status: "error",
-      count: 0,
+      sequence,
+      requestedAt,
+      receivedAt: new Date().toISOString(),
+      latencyMs: Date.now() - startedAt,
+      fixtureCount: 0,
+      payloadHash: null,
       sample: [],
       error: error instanceof Error ? error.message : "Unknown TxLINE fixture error",
+    };
+  }
+}
+
+async function fetchOddsValidationEvidence(messageId: string, timestamp: number) {
+  if (!hasLiveCredentials()) {
+    return { status: "missing-credentials", messageId, timestamp };
+  }
+
+  try {
+    const query = new URLSearchParams({ messageId, ts: String(timestamp) });
+    const response = await fetch(`${apiOrigin}/api/odds/validation?${query}`, {
+      headers: txlineHeaders(),
+    });
+    const text = await response.text();
+    const proof = JSON.parse(text);
+    const rootBytes = proof?.summary?.oddsSubTreeRoot;
+    const rootFingerprint = Array.isArray(rootBytes)
+      ? createHash("sha256").update(Buffer.from(rootBytes)).digest("hex")
+      : null;
+
+    return {
+      status: response.ok ? "verified" : `http-${response.status}`,
+      fixtureId: proof?.odds?.FixtureId,
+      messageId: proof?.odds?.MessageId || messageId,
+      timestamp: proof?.odds?.Ts || timestamp,
+      market: proof?.odds?.SuperOddsType,
+      prices: proof?.odds?.Prices,
+      updateStats: proof?.summary?.updateStats,
+      proofDepth: {
+        subTree: Array.isArray(proof?.subTreeProof) ? proof.subTreeProof.length : 0,
+        mainTree: Array.isArray(proof?.mainTreeProof) ? proof.mainTreeProof.length : 0,
+      },
+      rootFingerprint,
+      publicEndpoint: `/api/txline/odds/validation?${query}`,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      messageId,
+      timestamp,
+      error: error instanceof Error ? error.message : "Unknown TxLINE validation error",
     };
   }
 }

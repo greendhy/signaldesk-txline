@@ -1,4 +1,4 @@
-export type FeedMode = "replay" | "live" | "simulated-live";
+export type FeedMode = "replay" | "verified-replay" | "live" | "simulated-live";
 
 export type AgentId =
   | "sharp-move"
@@ -18,7 +18,12 @@ export type TradeSide =
 
 export type RiskMode = "normal" | "reduced" | "halted";
 
-export type ProofStatus = "available" | "pending-live-token" | "simulated" | "not-requested";
+export type ProofStatus =
+  | "available"
+  | "txline-validated"
+  | "pending-live-token"
+  | "simulated"
+  | "not-requested";
 
 export type Fixture = {
   fixtureId: number;
@@ -52,7 +57,16 @@ export type ScoreUpdate = {
   ts: number;
   minute: number;
   gameState: string;
-  action: "kickoff" | "goal" | "red-card" | "yellow-card" | "corner" | "var" | "halftime";
+  action:
+    | "kickoff"
+    | "goal"
+    | "red-card"
+    | "yellow-card"
+    | "corner"
+    | "var"
+    | "penalty"
+    | "halftime"
+    | "full-time";
   participant?: 1 | 2;
   participant1Goals: number;
   participant2Goals: number;
@@ -63,7 +77,7 @@ export type FeedEvent = OddsUpdate | ScoreUpdate;
 
 export type ReplayEvent = {
   offsetMs: number;
-  source: "txline-replay";
+  source: "txline-replay" | "txline-verified-replay";
   event: FeedEvent;
 };
 
@@ -73,6 +87,15 @@ export type ReplayScenario = {
   fixture: Fixture;
   description: string;
   events: ReplayEvent[];
+  provenance?: {
+    kind: "txline-verified";
+    sourceEndpoint: string;
+    sourceRecordCount: number;
+    sampleMessageId: string;
+    sampleTimestamp: number;
+    proofEndpoint: string;
+    capturedAt: string;
+  };
 };
 
 export type RiskConfig = {

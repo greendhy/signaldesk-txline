@@ -11,6 +11,8 @@
     "build": "tsc --noEmit && vite build",
     "start": "tsx src/server.ts",
     "check": "tsc --noEmit",
+    "test": "tsx --test src/shared/engine.test.ts",
+    "audit:replay": "tsx scripts/audit-verified-replay.ts",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
