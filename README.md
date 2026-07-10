@@ -7,6 +7,7 @@ The project targets the **Trading Tools and Agents** track. Execution is paper-o
 ## Live MVP
 
 - App: https://signaldesk-txline.onrender.com
+- Demo video: https://youtu.be/bx2U81AaQHg
 - Judge evidence: https://signaldesk-txline.onrender.com/api/judge/evidence
 - Verified input proof: https://signaldesk-txline.onrender.com/api/judge/verified-input
 - Live TxLINE pulse: https://signaldesk-txline.onrender.com/api/txline/pulse

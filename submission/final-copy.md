@@ -6,7 +6,7 @@ SignalDesk: TxLINE Counterfactual Risk Control Plane
 
 ## Demo Video
 
-Pending: add the final YouTube link after user approval.
+https://youtu.be/bx2U81AaQHg
 
 ## Public Repo
 
