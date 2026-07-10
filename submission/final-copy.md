@@ -21,6 +21,7 @@ https://signaldesk-txline.onrender.com
 - Evidence bundle: https://signaldesk-txline.onrender.com/api/judge/evidence
 - Verified TxLINE input: https://signaldesk-txline.onrender.com/api/judge/verified-input
 - Live TxLINE pulse: https://signaldesk-txline.onrender.com/api/txline/pulse
+- Public CI: https://github.com/greendhy/signaldesk-txline/actions/workflows/ci.yml
 
 The evidence bundle returns fresh request timestamps, live fixture verification, the real replay provenance, all triggered agents, three counterfactual risk-policy results, a sample SHA-256 receipt, and a sanitized TxLINE Merkle-proof summary.
 

@@ -18,6 +18,7 @@ Its novel feature is a counterfactual risk twin: judges can see not only what an
 - Judge evidence: https://signaldesk-txline.onrender.com/api/judge/evidence
 - Verified input proof: https://signaldesk-txline.onrender.com/api/judge/verified-input
 - Live pulse: https://signaldesk-txline.onrender.com/api/txline/pulse
+- Public CI: https://github.com/greendhy/signaldesk-txline/actions/workflows/ci.yml
 - Demo video: https://youtu.be/bx2U81AaQHg
 
 ## Live TxLINE Proof
