@@ -15,6 +15,10 @@ The project targets the **Trading Tools and Agents** track. Execution is paper-o
 - Live TxLINE pulse: https://signaldesk-txline.onrender.com/api/txline/pulse
 - Public repository: https://github.com/greendhy/signaldesk-txline
 
+![SignalDesk verified TxLINE replay with four autonomous agents, three counterfactual risk policies, decision receipts, and live proof](demo/signaldesk-verified-risk-twin.png)
+
+Verified France 2-1 Morocco replay after autonomous processing: four agents triggered, 23 receipts generated, and the same TxLINE event stream evaluated under normal, reduced, and halted policies.
+
 ## Winning Product Angle
 
 SignalDesk is a control plane for autonomous sports-trading agents, not another alert bot. Its central feature is a counterfactual risk twin: the same TxLINE event sequence is evaluated under normal, reduced, and halted execution policies so an operator can see what would pass, what would be blocked, and how much exposure each policy prevents.
