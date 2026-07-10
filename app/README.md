@@ -56,6 +56,7 @@ Local SignalDesk API:
 - `GET /api/replay/scenarios`
 - `POST /api/engine/run/:scenarioId`
 - `GET /api/txline/status`
+- `GET /api/judge/evidence`
 - `GET /api/txline/fixtures`
 - `GET /api/txline/odds/snapshot/:fixtureId`
 - `GET /api/txline/scores/snapshot/:fixtureId`
@@ -83,6 +84,7 @@ Mainnet free-tier activation has been completed and deployed server-side on Rend
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 - Local verified proxy endpoint: `GET /api/txline/fixtures`
 - Public verified proxy endpoint: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- Public judge evidence endpoint: `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
 - Verification result: HTTP 200 with TxLINE fixture JSON and `liveReady: true`
 
 ## TxLINE Endpoints Targeted

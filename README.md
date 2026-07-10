@@ -9,6 +9,7 @@ The project is built for the **Trading Tools and Agents** track. It is not a rea
 - App: https://signaldesk-txline.onrender.com
 - Health: https://signaldesk-txline.onrender.com/api/health
 - TxLINE status: https://signaldesk-txline.onrender.com/api/txline/status
+- Judge evidence: https://signaldesk-txline.onrender.com/api/judge/evidence
 - Public repository: https://github.com/greendhy/signaldesk-txline
 
 ## Why This Can Win
@@ -29,6 +30,7 @@ Mainnet free-tier activation has been completed and deployed server-side on Rend
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 - Local verified endpoint: `GET /api/txline/fixtures`
 - Public verified endpoint: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- Public judge evidence endpoint: `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
 - Verification result: HTTP 200 with TxLINE fixture JSON and `liveReady: true`
 
 ## Run Locally

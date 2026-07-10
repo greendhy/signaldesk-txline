@@ -517,6 +517,7 @@ function ReceiptPanel({
         <span className="eyebrow">Live TxLINE proof</span>
         <KeyValue label="Status" value={proofStatusLabel(liveProof.status)} />
         <KeyValue label="Proxy" value="/api/txline/fixtures" />
+        <KeyValue label="Evidence" value="/api/judge/evidence" />
         {liveProof.fixtureCount !== undefined && <KeyValue label="Fixtures" value={`${liveProof.fixtureCount} live rows`} />}
         {liveProof.apiOrigin && <KeyValue label="Origin" value={liveProof.apiOrigin} />}
       </div>

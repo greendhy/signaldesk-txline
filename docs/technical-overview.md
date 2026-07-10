@@ -37,6 +37,7 @@ TxLINE feed or replay scenario
 - `GET /api/replay/stream/:id`
 - `POST /api/engine/run/:id`
 - `GET /api/txline/status`
+- `GET /api/judge/evidence`
 - `GET /api/txline/fixtures`
 - `GET /api/txline/odds/snapshot/:fixtureId`
 - `GET /api/txline/scores/snapshot/:fixtureId`
@@ -50,6 +51,7 @@ Public verification endpoints:
 - `GET https://signaldesk-txline.onrender.com/api/health`
 - `GET https://signaldesk-txline.onrender.com/api/txline/status`
 - `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
 
 ## Agents
 
@@ -89,6 +91,7 @@ Mainnet activation proof:
 - Subscription transaction: `5eCDXbZTx82XJx4jUAYRrVQuJsTxZ2kAQDrKRoQowto1iJ2NdsYFyrjBVUnboTN8WFMJDoALLzjH7bFTBhPXJwUB`
 - Activated at: `2026-07-07T11:05:48.470Z`
 - Live fixture snapshot verified locally and publicly: `GET /api/txline/fixtures` returned HTTP 200 with TxLINE fixture JSON.
+- Judge evidence endpoint returns live fixture count, TxLINE credential status, autonomous replay decision count, triggered agents, and a sample SHA-256 receipt without exposing API tokens.
 
 Required headers:
 

@@ -53,7 +53,7 @@ Switch to live mode and show the TxLINE proof panel.
 
 Say:
 
-The free-tier wallet activation is complete. Live endpoints are consumed server-side, API tokens are not exposed to browsers, and the app verifies the fixture snapshot through the public Render deployment.
+The free-tier wallet activation is complete. Live endpoints are consumed server-side, API tokens are not exposed to browsers, and the app verifies the fixture snapshot through the public Render deployment. The judge evidence endpoint packages the live feed proof, autonomous decisions, risk controls, and receipt hash in one testable API response.
 
 ## 4:40 - 5:00
 

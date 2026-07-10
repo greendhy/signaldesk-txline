@@ -17,8 +17,9 @@ Public verification endpoints:
 - `GET https://signaldesk-txline.onrender.com/api/health`
 - `GET https://signaldesk-txline.onrender.com/api/txline/status`
 - `GET https://signaldesk-txline.onrender.com/api/txline/fixtures`
+- `GET https://signaldesk-txline.onrender.com/api/judge/evidence`
 
-Render deployment is live with server-side TxLINE credentials. `GET /api/txline/fixtures` returns HTTP 200 with live TxLINE fixture JSON.
+Render deployment is live with server-side TxLINE credentials. `GET /api/txline/fixtures` returns HTTP 200 with live TxLINE fixture JSON. `GET /api/judge/evidence` gives judges a machine-readable proof bundle: live fixture status, autonomous decision count, triggered agents, risk controls, TxLINE endpoints used, and a sample SHA-256 receipt hash.
 
 ## Demo Video
 
@@ -39,6 +40,7 @@ Use `docs/technical-overview.md`.
 - Local verification: `GET /api/txline/fixtures` returned HTTP 200 with live fixture JSON.
 - Public verification: `GET https://signaldesk-txline.onrender.com/api/txline/fixtures` returned HTTP 200 with live fixture JSON.
 - Public health: `GET https://signaldesk-txline.onrender.com/api/health` reports `liveReady: true`.
+- Judge evidence: `GET https://signaldesk-txline.onrender.com/api/judge/evidence` reports live TxLINE fixtures and autonomous strategy receipts without exposing credentials.
 
 ## TxLINE API Feedback
 

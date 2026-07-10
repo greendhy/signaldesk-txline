@@ -100,6 +100,10 @@ app.get("/api/txline/status", (_req, res) => {
   res.json(txlineStatus());
 });
 
+app.get("/api/judge/evidence", async (_req, res) => {
+  res.json(await buildJudgeEvidence());
+});
+
 app.post("/api/activation/guest", async (req, res) => {
   const network = normalizeNetwork(req.body?.network);
   if (!network) {
@@ -252,6 +256,94 @@ function txlineStatus() {
       "/api/scores/stat-validation",
     ],
   };
+}
+
+async function buildJudgeEvidence() {
+  const scenario = replayScenarios[0];
+  const ticks = runScenario(scenario, defaultRiskConfig, "replay");
+  const decisions = ticks.flatMap((tick) => tick.decisions);
+  const firstReceipt = decisions.find((decision) => decision.receipt.payloadHash);
+  const liveFixtures = await fetchLiveFixtureEvidence();
+
+  return {
+    project: "SignalDesk: Verifiable TxLINE Trading Command Center",
+    track: "Trading Tools and Agents",
+    appUrl: "https://signaldesk-txline.onrender.com",
+    repoUrl: "https://github.com/greendhy/signaldesk-txline",
+    txline: {
+      ...txlineStatus(),
+      publicProofEndpoint: "/api/txline/fixtures",
+      liveFixtures,
+    },
+    autonomy: {
+      scenario: scenario.name,
+      replayEvents: scenario.events.length,
+      decisionsGenerated: decisions.length,
+      agentsTriggered: Array.from(new Set(decisions.map((decision) => decision.agentLabel))),
+      sampleReceipt: firstReceipt
+        ? {
+            receiptId: firstReceipt.receipt.receiptId,
+            sourceMode: firstReceipt.receipt.sourceMode,
+            endpoint: firstReceipt.receipt.txlineEndpoint,
+            sourceMessageId: firstReceipt.receipt.sourceMessageId,
+            payloadHash: firstReceipt.receipt.payloadHash,
+            proofStatus: firstReceipt.receipt.proofStatus,
+          }
+        : null,
+    },
+    riskControls: {
+      confidenceFloor: defaultRiskConfig.confidenceFloor,
+      maxExposure: defaultRiskConfig.maxExposure,
+      maxSingleNotional: defaultRiskConfig.maxSingleNotional,
+      modes: ["normal", "reduced", "halted"],
+    },
+    txlineEndpointsUsed: [
+      "/api/fixtures/snapshot",
+      "/api/odds/stream",
+      "/api/scores/stream",
+      "/api/odds/validation",
+      "/api/scores/stat-validation",
+    ],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+async function fetchLiveFixtureEvidence() {
+  if (!hasLiveCredentials()) {
+    return {
+      status: "missing-credentials",
+      count: 0,
+      sample: [],
+    };
+  }
+
+  try {
+    const response = await fetch(`${apiOrigin}/api/fixtures/snapshot`, {
+      headers: txlineHeaders(),
+    });
+    const text = await response.text();
+    const fixtures = JSON.parse(text);
+    return {
+      status: response.ok ? "verified" : `http-${response.status}`,
+      count: Array.isArray(fixtures) ? fixtures.length : 0,
+      sample: Array.isArray(fixtures)
+        ? fixtures.slice(0, 3).map((fixture) => ({
+            fixtureId: fixture.FixtureId,
+            competition: fixture.Competition,
+            participant1: fixture.Participant1,
+            participant2: fixture.Participant2,
+            startTime: fixture.StartTime,
+          }))
+        : [],
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      count: 0,
+      sample: [],
+      error: error instanceof Error ? error.message : "Unknown TxLINE fixture error",
+    };
+  }
 }
 
 async function proxyTxlineJson(pathname: string, res: express.Response) {
